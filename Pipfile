@@ -1,14 +1,21 @@
 [[source]]
 
 name = "pypi"
-verify_ssl = true
 url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+
+[dev-packages]
+
 
 
 [packages]
 
 google-api-python-client = "*"
+"httplib2" = "*"
+requests = "*"
 
 
-[dev-packages]
+[requires]
 
+python_version = "3.4"
