@@ -1,11 +1,23 @@
 # python gmail relay
+Simple python module used to send mails via the Gmail API.
 
-* This relay client requires **python > 3.0**
-* **pipenv** is not strictly required but encouraged for package management
-    * Otherwise, all special requirements should be listed in the *Packages* section of *pygmail/Pipfile*
+The relay client makes use of Google's own Oauth2 authorization-flow so that a dedicated Google account can send arbitrary emails anywhere, on your behalf.
+*I primarily made this module and these instructions with myself in mind*, but If you do happen to try this module, feel free to ask questions or suggest improvements.
+
+#### Why
+I wanted a simple way to send emails from python, or anything that can invoke python for that matter. Obviously I don't want to set up a personal mailserver on every device I use, so I settled to using Gmail for convenient abstraction of the problem.
+
+Storing and passing your Google account's *username* and *password* with each POST request seems like a **very bad** way of doing it (even if you're using an expendable account for sending emails) and the right way of authenticating on the web is obviously Oauth. As it happens, this approach is not entirely straight forward and can at some points be fairly difficult to grasp. I for one often make use of email-notifications in my projects; to issue warnings or to make me more aware using periodic status reports, and you quickly get tired of reinventing the wheel every time you just want to send a lousy email.
+
+Therefore, I made this simple Python module to make my life a whole lot easier.
+
+#### Requirements
+* The relay client has some components that require **python version > 3.0**
+* **pipenv** is used for package management, and is not a strict requirement but encouraged for your convenience.
+* Required packages are listed in the *"packages"* section of **pygmail/Pipfile** (installed automatically by *pipenv*)
 
 ## Usage
-Initialize virtual environment:
+Initialize virtual environment and install packages:
 ```bash
 $ pipenv --three install
 ```
@@ -13,13 +25,10 @@ Formal runtime invocation of the relay client:
 ```bash
 $ pipenv run python3 relay.py
 
-# or, if you want to avoid venv, just plain and simple
+# or, if you want to avoid the venv, just plain and simple
 $ python3 relay.py
 ```
-However, I recommend either adding the script to PATH or creating a macro as such:
-```bash
-pygmail() { pipenv run python3 ~/bin/relay.py "$@"; }
-```
+However, for using this module as a quick and dirty standalone way of passing around files and information, I recommend either simply adding the script to PATH or creating a simple macro.
 
 ## First time setup
 ### Setup Gmail access point
