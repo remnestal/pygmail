@@ -14,8 +14,3 @@ verify_ssl = true
 google-api-python-client = "*"
 "httplib2" = "*"
 requests = "*"
-
-
-[requires]
-
-python_version = "3.4"
