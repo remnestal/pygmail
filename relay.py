@@ -1,3 +1,4 @@
+import argparse
 import httplib2
 import base64
 
@@ -8,36 +9,38 @@ from oauth2client.file import Storage
 
 from email.mime.text import MIMEText
 
-import requests
-import json
-
 OAUTH_SCOPE = 'https://www.googleapis.com/auth/gmail.compose'
 CLIENT_SECRET_FILE = 'client_secret.json'
 STORAGE = Storage('storage.json')
 
-BACKUP_JOKE = 'It was supposed to be a joke here, but the API key has probably expired, so..\n\nI guess the joke is on me, Hahahahahaha!'
-
 def main():
-    """Hello, World!
+    """Parse input arguments and send mail
 
-    First test implementation of the Gmail-API
-    Request a joke from webknox.com and send it to your mail
+    First test of argparse implementation. default_args contains the default
+    values of each input parameter.
     """
-    subject = 'Hello, World!'
-    recipients = ['albin.remnestal@gmail.com']
-    sender = 'authorized.sender@gmail.com'
-    sender_alias = 'Funniest guy alive'
+    credentials = __get_credentials()
+    http = credentials.authorize(httplib2.Http())
+    service = discovery.build('gmail', 'v1', http=http)
 
-    # this is my idea of how to be funny
-    try:
-        response = requests.get('http://webknox.com/api/jokes/oneLiner?apiKey=bfbegfeaejnvrtohfkelpzaxzdxeqyh')
-        fact = json.loads(response.text)['text']
-    except:
-        fact = BACKUP_JOKE
+    profile = service.users().getProfile(userId="me").execute()
+    sender = profile['emailAddress']
+    default_args = {
+        'subject': 'No subject',
+        'body': 'Empty message',
+        'to': sender,
+        'alias': None
+    }
 
-    __post_message(
-        __get_credentials(),
-        __create_message(subject, fact, recipients, sender, sender_alias))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--subject',  default=default_args['subject'],  help='subject line')
+    parser.add_argument('-b', '--body',     default=default_args['body'],     help='text body')
+    parser.add_argument('-t', '--to',       default=default_args['to'],       help='whitespace-separated list of recipients')
+    parser.add_argument('-a', '--alias',    default=default_args['alias'],    help='name alias for the sender')
+    args = {**vars(parser.parse_args()), **{'sender': sender}}
+
+    message = __create_message(args)
+    __post_message(service, message)
 
 def __get_credentials():
     """Retrieves valid user credentials
@@ -55,7 +58,7 @@ def __get_credentials():
 
     return credentials
 
-def __create_message(subject, text, recipients, sender, sender_alias=None):
+def __create_message(arguments):
     """Creates a base64 encoded email-message
 
     Creates a dict containing the body of the email, using 'raw' as the key.
@@ -65,24 +68,23 @@ def __create_message(subject, text, recipients, sender, sender_alias=None):
     Returns:
         mail_body, the body part of the email
     """
-    msg = MIMEText(text)
-    msg['subject'] = subject
-    msg['to'] = ",".join(recipients)
-    if sender_alias:
-        msg['from'] = "%s <%s>" % (sender_alias, sender)
-    else:
-        msg['from'] = sender
+    message = MIMEText(arguments['body'])
+    message['subject'] = arguments['subject']
+    message['to'] = ",".join(arguments['to'].split())
 
-    b64_bytes = base64.urlsafe_b64encode(msg.as_bytes())
+    if arguments['alias']:
+        message['from'] = "%s <%s>" % (arguments['alias'], arguments['sender'])
+    else:
+        message['from'] = arguments['sender']
+
+    b64_bytes = base64.urlsafe_b64encode(message.as_bytes())
     b64_string = b64_bytes.decode()
     mail_body = {'raw': b64_string}
 
     return mail_body
 
 
-def __post_message(credentials, mail_body):
-    auth_http = credentials.authorize(httplib2.Http())
-    service = discovery.build('gmail', 'v1', http=auth_http)
+def __post_message(service, mail_body):
     try:
         email = (service.users().messages().send(userId="me", body=mail_body).execute())
         print(email)
