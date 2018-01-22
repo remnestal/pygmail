@@ -2,6 +2,7 @@ import argparse
 import httplib2
 import base64
 
+import sys
 from pathlib import Path
 
 from apiclient import discovery
@@ -53,6 +54,9 @@ def __get_credentials():
     Returns:
         credentials, a valid set of credentials
     """
+    if not Path(CLIENT_SECRET_FILE).is_file():
+        print('"%s" is required.' % CLIENT_SECRET_FILE)
+        sys.exit(1)
 
     if not Path(STORAGE_FILE).is_file():
         open(STORAGE_FILE, 'a').close()
