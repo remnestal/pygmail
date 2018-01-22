@@ -2,6 +2,8 @@ import argparse
 import httplib2
 import base64
 
+from pathlib import Path
+
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
@@ -11,7 +13,7 @@ from email.mime.text import MIMEText
 
 OAUTH_SCOPE = 'https://www.googleapis.com/auth/gmail.compose'
 CLIENT_SECRET_FILE = 'client_secret.json'
-STORAGE = Storage('storage.json')
+STORAGE_FILE = 'storage.json'
 
 def main():
     """Parse input arguments and send mail
@@ -51,7 +53,11 @@ def __get_credentials():
     Returns:
         credentials, a valid set of credentials
     """
-    credentials = STORAGE.get()
+
+    if not Path(STORAGE_FILE).is_file():
+        open(STORAGE_FILE, 'a').close()
+
+    credentials = Storage(STORAGE_FILE).get()
     if credentials is None or credentials.invalid:
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, OAUTH_SCOPE)
         credentials = tools.run_flow(flow, STORAGE)
