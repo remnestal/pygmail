@@ -40,7 +40,9 @@ def main():
     parser.add_argument('-b', '--body',     default=default_args['body'],     help='text body')
     parser.add_argument('-t', '--to',       default=default_args['to'],       help='whitespace-separated list of recipients')
     parser.add_argument('-a', '--alias',    default=default_args['alias'],    help='name alias for the sender')
-    args = {**vars(parser.parse_args()), **{'sender': sender}}
+
+    args = vars(parser.parse_args())
+    args['sender'] = sender
 
     message = __create_message(args)
     __post_message(service, message)
