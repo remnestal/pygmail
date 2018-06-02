@@ -1,6 +1,22 @@
+import httplib2
+from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
+
+
+class Session(object):
+    """ Handler class for making authenticated calls to the Gmail API """
+
+    def __init__(self, storage=None, secret=None):
+        """ Set up the authenticated session with the Gmail API """
+        self.token = Token(storage, secret)
+        self.service = self.start_service()
+
+    def start_service(self):
+        """ Initialize the API connection """
+        http = self.token().authorize(httplib2.Http())
+        self.service = discovery.build('gmail', 'v1', http=http)
 
 
 class Token(Storage):
@@ -24,6 +40,10 @@ class Token(Storage):
                 self.refresh_token()
             else:
                 self.credentials = stored_token
+
+    def __call__(self):
+        """ Return the OAuth2Credentials associated with this token """
+        return self.credentials
 
     def refresh_token(self):
         """ Request a new set of credentials via Google's auth-flow
