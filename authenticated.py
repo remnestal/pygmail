@@ -16,7 +16,7 @@ class Session(object):
     def start_service(self):
         """ Initialize the API connection """
         http = self.token().authorize(httplib2.Http())
-        self.service = discovery.build('gmail', 'v1', http=http)
+        return discovery.build('gmail', 'v1', http=http)
 
 
 class Token(Storage):
