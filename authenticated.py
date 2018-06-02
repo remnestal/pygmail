@@ -26,7 +26,15 @@ class Token(Storage):
                 self.credentials = stored_token
 
     def refresh_token(self):
-        """ Request a new set of credentials via Google's auth-flow """
+        """ Request a new set of credentials via Google's auth-flow
+
+            Raises:
+                FileNotFoundError: if client-secret file does not exist
+        """
+
+        # check that the specified client secret file exists
+        with open(self.secret) as _:
+            pass
 
         flow = client.flow_from_clientsecrets(self.secret, self.oauth_scope)
         self.credentials = tools.run_flow(flow, Storage(self.storage))
