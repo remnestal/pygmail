@@ -4,13 +4,18 @@ from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
 
+_defaults = {
+    'oauth_scope': 'https://www.googleapis.com/auth/gmail.compose',
+    'storage': 'storage.json',
+    'secret': 'client_secret.json'
+}
 
 class Session(object):
     """Handler class for making authenticated calls to the Gmail API"""
 
-    def __init__(self, storage=None, secret=None):
+    def __init__(self, storage=None, secret=None, oauth_scope=None):
         """Set up the authenticated session with the Gmail API"""
-        self.token = Token(storage, secret)
+        self.token = Token(storage, secret, oauth_scope)
         self.service = self.start_service()
 
     def start_service(self):
@@ -24,17 +29,19 @@ class Session(object):
 
 
 class Token(Storage):
-    """Class for storing and managing an Oauth2 refresh token"""
+    """Class for storing and managing an Oauth2 refresh token
 
-    oauth_scope = 'https://www.googleapis.com/auth/gmail.compose'
-    default_storage = 'storage.json'
-    default_secret = 'client_secret.json'
+    Args:
+        storage (str, optional): path to the token storage
+        secret (str, optional): path to the client-secret
+        oauth_scope (str, optional): specification of authenticated privileges
+    """
+    def __init__(self, storage=None, secret=None, oauth_scope=None,
+                 invalidate=False):
 
-    def __init__(self, storage=None, secret=None, invalidate=False):
-        """Read a stored Oauth2 token or generate a new one"""
-
-        self.storage = storage or self.default_storage
-        self.secret = secret or self.default_secret
+        self.oauth_scope = oauth_scope or _defaults['oauth_scope']
+        self.storage = storage or _defaults['storage']
+        self.secret = secret or _defaults['secret']
 
         if invalidate:
             self.refresh_token()
