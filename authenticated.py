@@ -18,6 +18,10 @@ class Session(object):
         http = self.token().authorize(httplib2.Http())
         return discovery.build('gmail', 'v1', http=http)
 
+    def __call__(self):
+        """ Return the Gmail API handle """
+        return self.service
+
 
 class Token(Storage):
     """ Class for storing and managing an Oauth2 refresh token """
