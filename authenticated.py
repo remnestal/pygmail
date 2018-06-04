@@ -13,9 +13,10 @@ _defaults = {
 class Session(object):
     """Handler class for making authenticated calls to the Gmail API"""
 
-    def __init__(self, storage=None, secret=None, oauth_scope=None):
+    def __init__(self, storage=None, secret=None, oauth_scope=None,
+                 invalidate=False):
         """Set up the authenticated session with the Gmail API"""
-        self.token = Token(storage, secret, oauth_scope)
+        self.token = Token(storage, secret, oauth_scope, invalidate)
         self.service = self.start_service()
 
     def start_service(self):
